@@ -8,9 +8,9 @@
   },
   {
     "id": "user-2",
-    "name": "Usuario de prueba",
+    "name": "María González",
     "carnet": "7654321",
-    "password": "usuario123",
-    "role": "USUARIO"
+    "password": "instructor123",
+    "role": "INSTRUCTOR"
   }
 ]
