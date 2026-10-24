@@ -132,25 +132,52 @@ export const dancerRepository = {
       color: colors[dancers.length % colors.length],
     };
 
-    storageService.set(DANCERS_KEY, [...dancers, created]);
+    storageService.set<Dancer[]>(DANCERS_KEY, [
+      ...dancers,
+      created,
+    ]);
 
     return created;
   },
 
   updateScore(id: string, score: number): void {
-    storageService.set(
+    storageService.set<Dancer[]>(
       DANCERS_KEY,
       getDancers().map((dancer) =>
-        dancer.id === id ? { ...dancer, score } : dancer
+        dancer.id === id
+          ? { ...dancer, score }
+          : dancer
       )
     );
   },
 
   updateLevel(id: string, level: DanceLevel): void {
-    storageService.set(
+    storageService.set<Dancer[]>(
       DANCERS_KEY,
       getDancers().map((dancer) =>
-        dancer.id === id ? { ...dancer, level } : dancer
+        dancer.id === id
+          ? { ...dancer, level }
+          : dancer
+      )
+    );
+  },
+
+  /**
+   * Actualiza el porcentaje de asistencia de una bailarina.
+   * El porcentaje debe estar entre 0 y 100.
+   */
+  updateAttendance(id: string, attendance: number): void {
+    const safeAttendance = Math.max(
+      0,
+      Math.min(100, Math.round(attendance))
+    );
+
+    storageService.set<Dancer[]>(
+      DANCERS_KEY,
+      getDancers().map((dancer) =>
+        dancer.id === id
+          ? { ...dancer, attendance: safeAttendance }
+          : dancer
       )
     );
   },
@@ -167,7 +194,7 @@ export const dancerRepository = {
       promoted: false,
     };
 
-    storageService.set(EVALUATIONS_KEY, [
+    storageService.set<DancerEvaluation[]>(EVALUATIONS_KEY, [
       ...getEvaluations(),
       savedEvaluation,
     ]);
@@ -177,21 +204,31 @@ export const dancerRepository = {
 
   confirmPromotion(evaluationId: string): boolean {
     const evaluations = getEvaluations();
+
     const evaluation = evaluations.find(
       (item) => item.id === evaluationId
     );
 
-    if (!evaluation || !evaluation.approved || evaluation.promoted) {
+    if (
+      !evaluation ||
+      !evaluation.approved ||
+      evaluation.promoted
+    ) {
       return false;
     }
 
-    if (evaluation.previousLevel === evaluation.recommendedLevel) {
+    if (
+      evaluation.previousLevel === evaluation.recommendedLevel
+    ) {
       return false;
     }
 
-    this.updateLevel(evaluation.dancerId, evaluation.recommendedLevel);
+    this.updateLevel(
+      evaluation.dancerId,
+      evaluation.recommendedLevel
+    );
 
-    storageService.set(
+    storageService.set<DancerEvaluation[]>(
       EVALUATIONS_KEY,
       evaluations.map((item) =>
         item.id === evaluationId

@@ -24,3 +24,167 @@ button { cursor: pointer; }
 .modal textarea { min-height: 88px; resize: vertical; border: 1px solid #e2dbe7; border-radius: 8px; padding: 11px; outline-color: #715592; font: inherit; }
 .evaluation-help { margin: 16px 0; color: #756a7e; font-size: 13px; }
 @media (max-width: 550px) { .admin-stats { grid-template-columns: 1fr; } }
+
+/* Mejoras del cuadro de evaluación */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(31, 24, 49, 0.58);
+  backdrop-filter: blur(5px);
+}
+
+.modal.evaluation {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: 90vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(32, 20, 55, 0.25);
+  scrollbar-width: thin;
+  scrollbar-color: #c9b7e8 #f5f1fa;
+}
+
+.modal.evaluation .eyebrow {
+  margin-bottom: 8px;
+  color: #8b70ad;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.modal.evaluation h2 {
+  margin: 0 36px 10px 0;
+  color: #30233f;
+  font-size: 27px;
+  line-height: 1.25;
+}
+
+.modal.evaluation h3 {
+  margin: 24px 0 6px;
+  padding-top: 18px;
+  border-top: 1px solid #eee8f5;
+  color: #39284c;
+  font-size: 17px;
+}
+
+.modal.evaluation .evaluation-help {
+  margin: 8px 0 18px;
+  color: #81778d;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.modal.evaluation label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 17px 0;
+  color: #5c506b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modal.evaluation input,
+.modal.evaluation select,
+.modal.evaluation textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 13px;
+  border: 1px solid #e5ddec;
+  border-radius: 10px;
+  outline: none;
+  background: #fcfaff;
+  color: #342640;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.modal.evaluation input:focus,
+.modal.evaluation select:focus,
+.modal.evaluation textarea:focus {
+  border-color: #9a79c7;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(154, 121, 199, 0.15);
+}
+
+.modal.evaluation textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.modal.evaluation .modal-close {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  float: right;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: -8px -8px 0 8px;
+  border: 0;
+  border-radius: 50%;
+  background: #f4eff9;
+  color: #6e5689;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.modal.evaluation .modal-close:hover {
+  background: #e9def5;
+}
+
+.modal.evaluation button[type="submit"] {
+  position: sticky;
+  bottom: -1px;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 22px;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7853a6, #9b75c6);
+  box-shadow: 0 8px 20px rgba(120, 83, 166, 0.23);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modal.evaluation button[type="submit"]:hover {
+  background: linear-gradient(135deg, #67438f, #8961b7);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .modal.evaluation {
+    width: 100%;
+    max-height: 94vh;
+    padding: 22px 18px;
+    border-radius: 17px;
+  }
+
+  .modal.evaluation h2 {
+    font-size: 23px;
+  }
+}

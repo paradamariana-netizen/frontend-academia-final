@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { authRepository } from "../repositories/authRepository";
 import { dancerRepository } from "../repositories/dancerRepository";
+import { storageService } from "../services/storageService";
 import type { User } from "../types/auth";
 import type { DanceLevel, Dancer } from "../types/dancer";
 import type {
@@ -13,6 +14,27 @@ import type {
 
 type Level = DanceLevel;
 type AgeCategory = "Infantil" | "Pre-juvenil" | "Juvenil" | "Mayores";
+
+type AttendanceStatus = "asistencia" | "permiso" | "ausencia";
+
+interface AttendanceRecord {
+  dancerId: string;
+  date: string;
+  status: AttendanceStatus;
+}
+
+const ATTENDANCE_KEY = "app_attendance";
+
+function getLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getAttendanceRecords(): AttendanceRecord[] {
+  return storageService.get<AttendanceRecord[]>(ATTENDANCE_KEY) ?? [];
+}
 
 const PRACTICAL_QUESTIONS: {
   key: keyof PracticalCriteria;
@@ -49,6 +71,18 @@ function getNextLevel(level: Level): Level {
   return "Avanzado";
 }
 
+function navigateToSection(
+  event: React.MouseEvent<HTMLAnchorElement>,
+  sectionId: string,
+) {
+  event.preventDefault();
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", `#${sectionId}`);
+  }
+}
+
 function Layout({
   user,
   children,
@@ -79,22 +113,28 @@ function Layout({
         </p>
 
         <nav className="side-nav" aria-label="Navegación principal">
-          <a className="active" href="#inicio">
+          <a href="#inicio" onClick={(event) => navigateToSection(event, "inicio")}>
             <span>⌂</span> Inicio
           </a>
 
-          <a href={isAdmin ? "#instructores" : "#bailarinas"}>
+          <a
+            href={isAdmin ? "#instructores" : "#bailarinas"}
+            onClick={(event) => navigateToSection(event, isAdmin ? "instructores" : "bailarinas")}
+          >
             <span>{isAdmin ? "◒" : "♙"}</span>{" "}
             {isAdmin ? "Instructores" : "Bailarinas"}
           </a>
 
           {!isAdmin && (
             <>
-              <a href="#niveles">
+              <a href="#niveles" onClick={(event) => navigateToSection(event, "niveles")}>
                 <span>◫</span> Niveles
               </a>
-              <a href="#evaluaciones">
+              <a href="#evaluaciones" onClick={(event) => navigateToSection(event, "evaluaciones")}>
                 <span>◔</span> Evaluaciones
+              </a>
+              <a href="#asistencia" onClick={(event) => navigateToSection(event, "asistencia")}>
+                <span>▦</span> Asistencia
               </a>
             </>
           )}
@@ -126,12 +166,90 @@ function InstructorDashboard({ user }: { user: User | null }) {
   const [dancers, setDancers] = useState<Dancer[]>(() =>
     dancerRepository.getDancers()
   );
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(
+    () => getAttendanceRecords()
+  );
+  const [attendanceDancerId, setAttendanceDancerId] = useState("");
+  const [attendanceMonth, setAttendanceMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [attendanceStatus, setAttendanceStatus] =
+    useState<AttendanceStatus>("asistencia");
+
+  const saveAttendance = (dancerId: string, date: string) => {
+    if (!dancerId) {
+      window.alert("Selecciona una bailarina primero.");
+      return;
+    }
+
+    const existing = attendanceRecords.find(
+      (record) => record.dancerId === dancerId && record.date === date
+    );
+
+    const updated = existing?.status === attendanceStatus
+      ? attendanceRecords.filter(
+          (record) => !(record.dancerId === dancerId && record.date === date)
+        )
+      : [
+          ...attendanceRecords.filter(
+            (record) => !(record.dancerId === dancerId && record.date === date)
+          ),
+          { dancerId, date, status: attendanceStatus },
+        ];
+
+    storageService.set<AttendanceRecord[]>(ATTENDANCE_KEY, updated);
+    setAttendanceRecords(updated);
+
+    // Actualizar el porcentaje de asistencia de la bailarina.
+    const dancerRecords = updated.filter(
+      (record) => record.dancerId === dancerId
+    );
+
+    const totalClasses = dancerRecords.filter(
+      (record) => record.status === "asistencia" ||
+                  record.status === "ausencia"
+    ).length;
+
+    const attendedClasses = dancerRecords.filter(
+      (record) => record.status === "asistencia"
+    ).length;
+
+    const attendancePercentage =
+      totalClasses > 0
+        ? Math.round((attendedClasses / totalClasses) * 100)
+        : 0;
+
+    dancerRepository.updateAttendance(
+      dancerId,
+      attendancePercentage
+    );
+
+    setDancers(dancerRepository.getDancers());
+  };
+
+  const daysInMonth = new Date(
+    attendanceMonth.getFullYear(), attendanceMonth.getMonth() + 1, 0
+  ).getDate();
+  const firstWeekday = new Date(
+    attendanceMonth.getFullYear(), attendanceMonth.getMonth(), 1
+  ).getDay();
+  const attendanceDays = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+  const attendanceMonthPrefix = `${attendanceMonth.getFullYear()}-${String(
+    attendanceMonth.getMonth() + 1
+  ).padStart(2, "0")}`;
+  const attendanceSummary = {
+    asistencia: attendanceRecords.filter((record) => record.dancerId === attendanceDancerId && record.status === "asistencia" && record.date.startsWith(attendanceMonthPrefix)).length,
+    permiso: attendanceRecords.filter((record) => record.dancerId === attendanceDancerId && record.status === "permiso" && record.date.startsWith(attendanceMonthPrefix)).length,
+    ausencia: attendanceRecords.filter((record) => record.dancerId === attendanceDancerId && record.status === "ausencia" && record.date.startsWith(attendanceMonthPrefix)).length,
+  };
 
   const [selectedLevel, setSelectedLevel] =
     useState<"Todos" | Level>("Todos");
 
   const [selectedAgeCategory, setSelectedAgeCategory] =
     useState<"Todas" | AgeCategory>("Todas");
+  const [searchTerm, setSearchTerm] = useState("");  
 
   const [selectedDancer, setSelectedDancer] = useState<Dancer | null>(null);
   const [writtenScore, setWrittenScore] = useState("70");
@@ -148,19 +266,23 @@ function InstructorDashboard({ user }: { user: User | null }) {
   const [dancerLevel, setDancerLevel] = useState<Level>("Iniciación");
 
   const visible = useMemo(
-    () =>
-      dancers.filter((dancer) => {
-        const matchesLevel =
-          selectedLevel === "Todos" || dancer.level === selectedLevel;
+  () =>
+    dancers.filter((dancer) => {
+      const matchesLevel =
+        selectedLevel === "Todos" || dancer.level === selectedLevel;
 
         const category = getAgeCategory(dancer.age);
         const matchesAge =
-          selectedAgeCategory === "Todas" ||
-          category === selectedAgeCategory;
+        selectedAgeCategory === "Todas" ||
+        category === selectedAgeCategory;
 
-        return matchesLevel && matchesAge;
+        const matchesSearch = dancer.name
+          .toLowerCase()
+          .includes(searchTerm.trim().toLowerCase());
+
+        return matchesLevel && matchesAge && matchesSearch;
       }),
-    [dancers, selectedLevel, selectedAgeCategory]
+    [dancers, selectedLevel, selectedAgeCategory, searchTerm]
   );
 
   const openEvaluation = (dancer: Dancer) => {
@@ -170,48 +292,53 @@ function InstructorDashboard({ user }: { user: User | null }) {
     setFeedback("");
   };
 
+
   const saveEvaluation = () => {
-    if (!selectedDancer) return;
+  if (!selectedDancer) return;
 
-    const written = Number(writtenScore);
+  const written = Number(writtenScore);
 
-    if (
-      writtenScore.trim() === "" ||
-      !Number.isFinite(written) ||
-      written < 0 ||
-      written > 100
-    ) {
-      window.alert("Ingresa una nota escrita entre 0 y 100.");
-      return;
-    }
+  if (
+    writtenScore.trim() === "" ||
+    !Number.isFinite(written) ||
+    written < 0 ||
+    written > 100
+  ) {
+    window.alert("Ingresa una nota escrita entre 0 y 100.");
+    return;
+  }
 
-    const practicalValues = PRACTICAL_QUESTIONS.map(
-      (question) => practicalCriteria[question.key]
+  const practicalValues = PRACTICAL_QUESTIONS.map(
+    (question) => practicalCriteria[question.key]
+  );
+
+  if (
+    practicalValues.some(
+      (value) => !Number.isInteger(value) || value < 1 || value > 5
+    )
+  ) {
+    window.alert(
+      "Todos los criterios prácticos deben estar entre 1 y 5."
     );
+    return;
+  }
 
-    if (
-      practicalValues.some(
-        (value) => !Number.isInteger(value) || value < 1 || value > 5
-      )
-    ) {
-      window.alert("Todos los criterios prácticos deben estar entre 1 y 5.");
-      return;
-    }
+  const practicalAverage =
+    practicalValues.reduce((sum, value) => sum + value, 0) /
+    practicalValues.length;
 
-    const practicalAverage =
-      practicalValues.reduce((sum, value) => sum + value, 0) /
-      practicalValues.length;
+  const overallScore = Number(
+    ((written / 10 + practicalAverage * 2) / 2).toFixed(1)
+  );
 
-    const overallScore = Number(
-      ((written / 10 + practicalAverage * 2) / 2).toFixed(1)
-    );
+  const approved = written >= 70 && practicalAverage >= 4;
 
-    const approved = written >= 70 && practicalAverage >= 4;
-    const recommendedLevel = approved
-      ? getNextLevel(selectedDancer.level)
-      : selectedDancer.level;
+  const recommendedLevel = approved
+    ? getNextLevel(selectedDancer.level)
+    : selectedDancer.level;
 
-    const saved = dancerRepository.saveEvaluation({
+  try {
+    dancerRepository.saveEvaluation({
       dancerId: selectedDancer.id,
       dancerName: selectedDancer.name,
       instructorName: user?.name ?? "Instructor",
@@ -227,23 +354,33 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
     dancerRepository.updateScore(selectedDancer.id, overallScore);
 
-    setDancers((current) =>
-      current.map((dancer) =>
-        dancer.id === selectedDancer.id
-          ? { ...dancer, score: overallScore }
-          : dancer
-      )
-    );
+    // Recargar los datos guardados para actualizar la pantalla.
+    setDancers(dancerRepository.getDancers());
+    setEvaluationHistory(dancerRepository.getEvaluations());
 
-    setEvaluationHistory((current) => [saved, ...current]);
+    // Cerrar el cuadro después de guardar.
     setSelectedDancer(null);
+    setWrittenScore("70");
+    setPracticalCriteria({ ...EMPTY_CRITERIA });
+    setFeedback("");
 
     window.alert(
-      approved
-        ? `Evaluación aprobada. ${selectedDancer.level === "Avanzado" ? "La bailarina ya está en el nivel máximo." : `El instructor puede confirmar su ascenso a ${recommendedLevel}.`}`
-        : "Evaluación guardada. La bailarina necesita mejorar antes de avanzar de nivel."
+      `Evaluación registrada correctamente.\n\n` +
+      `Bailarina: ${selectedDancer.name}\n` +
+      `Examen escrito: ${written}/100\n` +
+      `Promedio práctico: ${practicalAverage.toFixed(2)}/5\n` +
+      `Rendimiento general: ${overallScore}/10\n` +
+      `Resultado: ${approved ? "APROBADA" : "NO APROBADA"}\n` +
+      `Nivel recomendado: ${recommendedLevel}`
     );
-  };
+  } catch (error) {
+    console.error("Error al guardar la evaluación:", error);
+    window.alert(
+      "No se pudo guardar la evaluación. Revisa la consola para ver el error."
+    );
+  }
+};
+
 
   const addDancer = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -405,6 +542,23 @@ function InstructorDashboard({ user }: { user: User | null }) {
           </div>
 
           <div className="dancer-toolbar">
+            <div style={{ marginBottom: "16px" }}>
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Buscar bailarina por nombre..."
+                aria-label="Buscar bailarina por nombre"
+                style={{
+                  width: "100%",
+                  maxWidth: "400px",
+                  padding: "12px 14px",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                }}
+              />
+            </div>
             <div className="filters">
               {(["Todas", "Infantil", "Pre-juvenil", "Juvenil", "Mayores"] as const).map(
                 (category) => (
@@ -547,6 +701,9 @@ function InstructorDashboard({ user }: { user: User | null }) {
                       <td>{evaluation.writtenScore}/100</td>
                       <td>{evaluation.practicalScore}/5</td>
                       <td>
+                        <strong>{evaluation.overallScore.toFixed(1)}/10</strong>
+                      </td>
+                      <td>
                         {evaluation.approved ? "Aprobada" : "No aprobada"}
                       </td>
                       <td>
@@ -580,6 +737,88 @@ function InstructorDashboard({ user }: { user: User | null }) {
               </table>
             </div>
           )}
+        </section>
+
+        <section className="dancers-section" id="asistencia">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">CONTROL DIARIO</p>
+              <h2>Asistencia de bailarinas</h2>
+              <p className="subtitle">
+                Selecciona una bailarina y marca el estado de cada fecha del calendario.
+              </p>
+            </div>
+          </div>
+
+          <label>
+            Seleccionar bailarina
+            <select
+              value={attendanceDancerId}
+              onChange={(event) => setAttendanceDancerId(event.target.value)}
+            >
+              <option value="">Selecciona una bailarina</option>
+              {dancers.map((dancer) => (
+                <option key={dancer.id} value={dancer.id}>{dancer.name}</option>
+              ))}
+            </select>
+          </label>
+
+          <div className="filters" style={{ margin: "20px 0", flexWrap: "wrap" }}>
+            <button type="button" className={attendanceStatus === "asistencia" ? "filter active-filter" : "filter"} onClick={() => setAttendanceStatus("asistencia")}>🟢 Asistencia</button>
+            <button type="button" className={attendanceStatus === "permiso" ? "filter active-filter" : "filter"} onClick={() => setAttendanceStatus("permiso")}>🟡 Permiso</button>
+            <button type="button" className={attendanceStatus === "ausencia" ? "filter active-filter" : "filter"} onClick={() => setAttendanceStatus("ausencia")}>🔴 Ausencia</button>
+          </div>
+
+          <div className="section-heading" style={{ alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <button type="button" className="text-button" onClick={() => setAttendanceMonth(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth() - 1, 1))}>← Mes anterior</button>
+            <h3 style={{ textTransform: "capitalize", margin: 0 }}>
+              {attendanceMonth.toLocaleDateString("es-BO", { month: "long", year: "numeric" })}
+            </h3>
+            <button type="button" className="text-button" onClick={() => setAttendanceMonth(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth() + 1, 1))}>Mes siguiente →</button>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "6px", marginTop: "16px" }}>
+            {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
+              <strong key={day} style={{ textAlign: "center", padding: "8px 0", fontSize: "12px" }}>{day}</strong>
+            ))}
+            {Array.from({ length: firstWeekday }, (_, index) => <div key={`empty-${index}`} />)}
+            {attendanceDays.map((day) => {
+              const date = getLocalDateKey(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth(), day));
+              const record = attendanceRecords.find((item) => item.dancerId === attendanceDancerId && item.date === date);
+              const backgroundByStatus: Record<AttendanceStatus, string> = {
+                asistencia: "#bbf7d0",
+                permiso: "#fef08a",
+                ausencia: "#fecaca",
+              };
+              const colorByStatus: Record<AttendanceStatus, string> = {
+                asistencia: "#166534",
+                permiso: "#854d0e",
+                ausencia: "#991b1b",
+              };
+              return (
+                <button
+                  key={date}
+                  type="button"
+                  disabled={!attendanceDancerId}
+                  title={record ? `${day}: ${record.status}` : `Marcar el día ${day}`}
+                  onClick={() => saveAttendance(attendanceDancerId, date)}
+                  style={{ minHeight: "58px", padding: "4px", borderRadius: "10px", border: "1px solid #e5e7eb", background: record ? backgroundByStatus[record.status] : "#ffffff", color: record ? colorByStatus[record.status] : "#374151", cursor: attendanceDancerId ? "pointer" : "not-allowed", opacity: attendanceDancerId ? 1 : 0.5, fontWeight: 600, fontSize: "12px" }}
+                >
+                  {day}
+                  {record && <span style={{ display: "block", fontSize: "9px", marginTop: "4px" }}>{record.status === "asistencia" ? "Asistió" : record.status === "permiso" ? "Permiso" : "Ausente"}</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="stat-grid" style={{ marginTop: "24px" }}>
+            <article className="stat-card purple"><div><p>Asistencias</p><strong>{attendanceSummary.asistencia}</strong><small>Este mes</small></div></article>
+            <article className="stat-card yellow"><div><p>Permisos</p><strong>{attendanceSummary.permiso}</strong><small>Este mes</small></div></article>
+            <article className="stat-card coral"><div><p>Ausencias</p><strong>{attendanceSummary.ausencia}</strong><small>Este mes</small></div></article>
+          </div>
+          <p className="evaluation-help">
+            Elige un estado y pulsa una fecha para guardarlo. Si vuelves a pulsar la misma fecha con el mismo estado, se elimina la marca.
+          </p>
         </section>
       </section>
 
