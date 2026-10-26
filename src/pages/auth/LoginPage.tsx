@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -6,7 +7,11 @@ import { authRepository } from "../../repositories/authRepository";
 
 import type { LoginCredentials } from "../../types/auth";
 
-function LoginPage() {
+type LoginPageProps = {
+  onLoginSuccess?: () => void;
+};
+
+function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
@@ -24,27 +29,53 @@ function LoginPage() {
       return;
     }
 
+    onLoginSuccess?.();
     navigate("/", { replace: true });
   };
 
   return (
     <main className="login-page">
       <section className="login-showcase" aria-label="Academia">
-        <div className="brand"><span className="brand-mark">a</span><span>academia</span></div>
+        <div className="brand">
+          <span className="brand-mark">B</span>
+          <span>
+            Academia de Danza <strong>Bailarte</strong>
+          </span>
+        </div>
+
         <div className="showcase-copy">
           <p className="eyebrow">PLATAFORMA EDUCATIVA</p>
-          <h2>Enseñar transforma.<br /><em>Aprender inspira.</em></h2>
-          <p>Un espacio creado para impulsar el conocimiento y hacer crecer cada talento.</p>
+          <h2>
+            Enseñar transforma.
+            <br />
+            <em>Aprender inspira.</em>
+          </h2>
+          <p>
+            Un espacio creado para impulsar el conocimiento y hacer crecer
+            cada talento.
+          </p>
         </div>
-        <div className="showcase-footer"><span>✦</span> Aprende, enseña, evoluciona.</div>
+
+        <div className="showcase-footer">
+          <span>✦</span> Aprende, enseña, evoluciona.
+        </div>
       </section>
+
       <section className="login-panel">
-        <div className="mobile-brand"><span className="brand-mark">a</span> academia</div>
+        <div className="mobile-brand">
+          <span className="brand-mark">a</span> academia
+        </div>
+
         <LoginForm error={error} onSubmit={handleLogin} />
-        <p className="help-text">¿Necesitas ayuda? <a href="mailto:soporte@academia.edu">Contacta a soporte</a></p>
+
+        <p className="help-text">
+          ¿Necesitas ayuda?{" "}
+          <a href="mailto:soporte@academia.edu">Contacta a soporte</a>
+        </p>
       </section>
     </main>
   );
 }
 
 export default LoginPage;
+

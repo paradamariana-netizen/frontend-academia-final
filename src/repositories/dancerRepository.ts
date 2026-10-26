@@ -111,6 +111,32 @@ export const dancerRepository = {
   getDancers,
 
   getEvaluations,
+  
+  deleteDancer(id: string): boolean {
+    const dancers = getDancers();
+    const dancerExists = dancers.some((dancer) => dancer.id === id);
+
+    if (!dancerExists) {
+      return false;
+    }
+
+    // Eliminar la bailarina de la lista.
+    storageService.set<Dancer[]>(
+      DANCERS_KEY,
+      dancers.filter((dancer) => dancer.id !== id)
+    );
+
+    // Eliminar las evaluaciones asociadas a esa bailarina.
+    storageService.set<DancerEvaluation[]>(
+      EVALUATIONS_KEY,
+      getEvaluations().filter(
+        (evaluation) => evaluation.dancerId !== id
+      )
+    );
+
+    return true;
+  },
+
 
   getEvaluationsByDancer(dancerId: string): DancerEvaluation[] {
     return getEvaluations()

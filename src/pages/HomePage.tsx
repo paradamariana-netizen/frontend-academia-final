@@ -95,6 +95,7 @@ function Layout({
 
   const logout = () => {
     authRepository.logout();
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/login", { replace: true });
   };
 
@@ -104,7 +105,7 @@ function Layout({
         <div className="brand">
           <span className="brand-mark">S</span>
           <span>
-            Studio <strong>Allegra</strong>
+            Academia de Danza <strong>Bailarte</strong>
           </span>
         </div>
 
@@ -410,6 +411,53 @@ function InstructorDashboard({ user }: { user: User | null }) {
     setDancerLevel("Iniciación");
     setIsAddingDancer(false);
   };
+  
+  const deleteDancer = (dancer: Dancer) => {
+    const confirmed = window.confirm(
+      `¿Estás segura de que deseas eliminar a ${dancer.name}?\n\n` +
+      "Esta acción eliminará también su historial de evaluaciones y no se puede deshacer."
+    );
+
+    if (!confirmed) return;
+
+    const success = dancerRepository.deleteDancer(dancer.id);
+
+    if (!success) {
+      window.alert("No se pudo eliminar la bailarina.");
+      return;
+    }
+
+    // Actualizar la lista de bailarinas.
+    setDancers(dancerRepository.getDancers());
+
+    // Actualizar el historial de evaluaciones.
+    setEvaluationHistory(dancerRepository.getEvaluations());
+
+    // Limpiar la selección si corresponde a la bailarina eliminada.
+    if (selectedDancer?.id === dancer.id) {
+      setSelectedDancer(null);
+    }
+
+    // Limpiar la selección del calendario de asistencia.
+    if (attendanceDancerId === dancer.id) {
+      setAttendanceDancerId("");
+    }
+
+    // Eliminar sus registros de asistencia.
+    const updatedAttendance = attendanceRecords.filter(
+      (record) => record.dancerId !== dancer.id
+    );
+
+    storageService.set<AttendanceRecord[]>(
+      ATTENDANCE_KEY,
+      updatedAttendance
+    );
+
+    setAttendanceRecords(updatedAttendance);
+
+    window.alert(`${dancer.name} fue eliminada correctamente.`);
+  };
+
 
   const confirmPromotion = (evaluation: DancerEvaluation) => {
     const confirmed = window.confirm(
@@ -654,6 +702,14 @@ function InstructorDashboard({ user }: { user: User | null }) {
                       >
                         Evaluar <span>→</span>
                       </button>
+                      <button
+                        className="delete-button"
+                        type="button"
+                        onClick={() => deleteDancer(dancer)}
+                      >
+                        Eliminar
+                      </button>
+                    
                     </td>
                   </tr>
                 ))}
