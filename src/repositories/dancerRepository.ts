@@ -120,13 +120,13 @@ export const dancerRepository = {
       return false;
     }
 
-    // Eliminar la bailarina de la lista.
+    // Eliminar la estudiante de la lista.
     storageService.set<Dancer[]>(
       DANCERS_KEY,
       dancers.filter((dancer) => dancer.id !== id)
     );
 
-    // Eliminar las evaluaciones asociadas a esa bailarina.
+    // Eliminar las evaluaciones asociadas a esa estudiante.
     storageService.set<DancerEvaluation[]>(
       EVALUATIONS_KEY,
       getEvaluations().filter(
@@ -189,7 +189,7 @@ export const dancerRepository = {
   },
 
   /**
-   * Actualiza el porcentaje de asistencia de una bailarina.
+   * Actualiza el porcentaje de asistencia de una estudiante.
    * El porcentaje debe estar entre 0 y 100.
    */
   updateAttendance(id: string, attendance: number): void {
