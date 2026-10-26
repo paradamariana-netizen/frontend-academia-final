@@ -529,3 +529,407 @@ textarea {
 .delete-dancer-button:hover {
   background-color: #b91c1c;
 }
+
+/* ==========================================
+   BAILARTE - MEJORAS RESPONSIVAS
+   Ajustes para tablets y celulares
+   ========================================== */
+
+/* Evitar desbordamientos horizontales */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.dashboard-shell {
+  width: 100%;
+  min-width: 0;
+}
+
+.dashboard-content {
+  min-width: 0;
+}
+
+/* Evitar que el contenido de las secciones se desborde */
+.stat-grid,
+.levels-grid,
+.admin-stats,
+.dancers-section,
+.level-section,
+.section-heading,
+.dancer-toolbar {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Tablas desplazables sin ampliar toda la página */
+.table-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrap table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+}
+
+.table-wrap th,
+.table-wrap td {
+  white-space: nowrap;
+}
+
+.table-wrap td:first-child {
+  white-space: normal;
+}
+
+/* Formularios y controles */
+input,
+select,
+textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+
+button {
+  overflow-wrap: break-word;
+}
+
+/* ==========================================
+   TABLETS
+   ========================================== */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+    padding: 24px 14px;
+  }
+
+  .dashboard-content {
+    width: calc(100% - 220px);
+    margin-left: 220px;
+    padding: 28px 22px;
+  }
+
+  .stat-grid,
+  .levels-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar h1 {
+    font-size: 29px;
+  }
+}
+
+/* ==========================================
+   CELULARES
+   ========================================== */
+
+@media (max-width: 768px) {
+  .dashboard-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Menú superior */
+  .sidebar {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 15px;
+    gap: 8px;
+  }
+
+  /* Mostrar nuevamente el nombre de la academia */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    font-size: 17px;
+  }
+
+  .brand > span:last-child {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .brand-mark {
+    flex-shrink: 0;
+  }
+
+  .sidebar-label {
+    display: block;
+    margin: 8px 0 4px;
+    font-size: 10px;
+  }
+
+  /* Navegación horizontal desplazable */
+  .side-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 0 9px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .side-nav a,
+  .side-nav a:not(.active)::after {
+    font-size: 13px;
+  }
+
+  .side-nav a {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 6px;
+    min-height: 42px;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  .side-nav a span {
+    width: auto;
+    font-size: 17px;
+  }
+
+  /* Mostrar el usuario y el botón de cerrar sesión */
+  .sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 4px;
+    padding: 12px 0 0;
+  }
+
+  .sidebar-footer > div:not(.instructor-avatar) {
+    display: block;
+    min-width: 0;
+  }
+
+  .sidebar-footer strong {
+    overflow-wrap: anywhere;
+  }
+
+  .logout {
+    display: block;
+    flex-shrink: 0;
+    min-width: 40px;
+    margin-left: auto;
+  }
+
+  /* Área principal */
+  .dashboard-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 22px 14px 40px;
+  }
+
+  .topbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .topbar h1 {
+    font-size: clamp(24px, 6vw, 30px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* Tarjetas en una sola columna */
+  .stat-grid,
+  .levels-grid,
+  .admin-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    min-height: 105px;
+    padding: 18px;
+  }
+
+  .stat-card strong {
+    font-size: 29px;
+  }
+
+  .level-card {
+    width: 100%;
+    padding: 16px;
+  }
+
+  /* Encabezados y botones */
+  .section-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .section-heading h2 {
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .section-heading .primary-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .primary-button,
+  .evaluate,
+  .delete-button {
+    min-height: 40px;
+  }
+
+  /* Buscador y filtros */
+  .dancer-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .dancer-toolbar > div {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dancer-toolbar input,
+  .dancer-toolbar select {
+    width: 100%;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter {
+    flex: 0 0 auto;
+    min-height: 38px;
+    white-space: nowrap;
+  }
+
+  /* Formularios emergentes */
+  .modal-backdrop {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .modal,
+  .modal.evaluation {
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100dvh - 20px);
+    margin: auto 0;
+    padding: 22px 16px;
+    overflow-y: auto;
+    border-radius: 16px;
+  }
+
+  .modal h2,
+  .modal.evaluation h2 {
+    font-size: 23px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .modal label,
+  .modal input,
+  .modal select,
+  .modal textarea,
+  .modal.evaluation label,
+  .modal.evaluation input,
+  .modal.evaluation select,
+  .modal.evaluation textarea {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .modal button[type="submit"],
+  .modal .primary-button,
+  .modal.evaluation button[type="submit"] {
+    min-height: 46px;
+  }
+
+  /* Calendario de asistencia */
+  .calendar-grid {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ==========================================
+   CELULARES PEQUEÑOS
+   ========================================== */
+
+@media (max-width: 380px) {
+  .sidebar {
+    padding: 12px 10px;
+  }
+
+  .brand,
+  .brand > span:last-child {
+    font-size: 15px;
+  }
+
+  .dashboard-content {
+    padding: 18px 10px 32px;
+  }
+
+  .dancers-section {
+    padding: 12px 8px;
+  }
+
+  .section-heading h2 {
+    font-size: 20px;
+  }
+
+  .table-wrap table {
+    min-width: 620px;
+  }
+
+  .modal,
+  .modal.evaluation {
+    padding: 19px 12px;
+  }
+}
