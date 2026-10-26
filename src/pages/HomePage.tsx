@@ -119,11 +119,11 @@ function Layout({
           </a>
 
           <a
-            href={isAdmin ? "#instructores" : "#bailarinas"}
-            onClick={(event) => navigateToSection(event, isAdmin ? "instructores" : "bailarinas")}
+            href={isAdmin ? "#instructores" : "#estudiantes"}
+            onClick={(event) => navigateToSection(event, isAdmin ? "instructores" : "estudiantes")}
           >
             <span>{isAdmin ? "◒" : "♙"}</span>{" "}
-            {isAdmin ? "Instructores" : "Bailarinas"}
+            {isAdmin ? "Instructores" : "Estudiantes"}
           </a>
 
           {!isAdmin && (
@@ -180,7 +180,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
   const saveAttendance = (dancerId: string, date: string) => {
     if (!dancerId) {
-      window.alert("Selecciona una bailarina primero.");
+      window.alert("Selecciona una estudiante primero.");
       return;
     }
 
@@ -202,7 +202,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     storageService.set<AttendanceRecord[]>(ATTENDANCE_KEY, updated);
     setAttendanceRecords(updated);
 
-    // Actualizar el porcentaje de asistencia de la bailarina.
+    // Actualizar el porcentaje de asistencia de la estudiante.
     const dancerRecords = updated.filter(
       (record) => record.dancerId === dancerId
     );
@@ -367,7 +367,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
     window.alert(
       `Evaluación registrada correctamente.\n\n` +
-      `Bailarina: ${selectedDancer.name}\n` +
+      `Estudiante: ${selectedDancer.name}\n` +
       `Examen escrito: ${written}/100\n` +
       `Promedio práctico: ${practicalAverage.toFixed(2)}/5\n` +
       `Rendimiento general: ${overallScore}/10\n` +
@@ -423,17 +423,17 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const success = dancerRepository.deleteDancer(dancer.id);
 
     if (!success) {
-      window.alert("No se pudo eliminar la bailarina.");
+      window.alert("No se pudo eliminar la estudiante.");
       return;
     }
 
-    // Actualizar la lista de bailarinas.
+    // Actualizar la lista de estudiantes.
     setDancers(dancerRepository.getDancers());
 
     // Actualizar el historial de evaluaciones.
     setEvaluationHistory(dancerRepository.getEvaluations());
 
-    // Limpiar la selección si corresponde a la bailarina eliminada.
+    // Limpiar la selección si corresponde a la estudiante eliminada.
     if (selectedDancer?.id === dancer.id) {
       setSelectedDancer(null);
     }
@@ -488,7 +488,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
               <span>✦</span>
             </h1>
             <p className="subtitle">
-              Califica el progreso de tus bailarinas y consulta sus grupos.
+              Califica el progreso de tus estudiantes y consulta sus grupos.
             </p>
           </div>
         </header>
@@ -496,7 +496,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
         <section className="stat-grid">
           <article className="stat-card purple">
             <div>
-              <p>Total bailarinas</p>
+              <p>Total estudiantes</p>
               <strong>{dancers.length}</strong>
               <small>En tus grupos activos</small>
             </div>
@@ -564,7 +564,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
                         dancers.filter((dancer) => dancer.level === level)
                           .length
                       }{" "}
-                      bailarinas
+                      estudiantes
                     </p>
                   </div>
                   <span className="arrow">→</span>
@@ -574,18 +574,18 @@ function InstructorDashboard({ user }: { user: User | null }) {
           </div>
         </section>
 
-        <section className="dancers-section" id="bailarinas">
+        <section className="dancers-section" id="estudiantes">
           <div className="section-heading">
             <div>
               <p className="eyebrow">SEGUIMIENTO</p>
-              <h2>Mis bailarinas</h2>
+              <h2>Mis estudiantes</h2>
             </div>
             <button
               type="button"
               className="primary-button"
               onClick={() => setIsAddingDancer(true)}
             >
-              <span>＋</span> Añadir bailarina
+              <span>＋</span> Añadir estudiante
             </button>
           </div>
 
@@ -595,8 +595,8 @@ function InstructorDashboard({ user }: { user: User | null }) {
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar bailarina por nombre..."
-                aria-label="Buscar bailarina por nombre"
+                placeholder="Buscar estudiante por nombre..."
+                aria-label="Buscar estudiante por nombre"
                 style={{
                   width: "100%",
                   maxWidth: "400px",
@@ -650,7 +650,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
             <table>
               <thead>
                 <tr>
-                  <th>BAILARINA</th>
+                  <th>Estudiante</th>
                   <th>EDAD</th>
                   <th>CATEGORÍA</th>
                   <th>NIVEL</th>
@@ -735,7 +735,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
               <table>
                 <thead>
                   <tr>
-                    <th>BAILARINA</th>
+                    <th>Estudiante</th>
                     <th>FECHA</th>
                     <th>ESCRITO</th>
                     <th>PRÁCTICO</th>
@@ -799,20 +799,20 @@ function InstructorDashboard({ user }: { user: User | null }) {
           <div className="section-heading">
             <div>
               <p className="eyebrow">CONTROL DIARIO</p>
-              <h2>Asistencia de bailarinas</h2>
+              <h2>Asistencia de estudiantes</h2>
               <p className="subtitle">
-                Selecciona una bailarina y marca el estado de cada fecha del calendario.
+                Selecciona una estudiante y marca el estado de cada fecha del calendario.
               </p>
             </div>
           </div>
 
           <label>
-            Seleccionar bailarina
+            Seleccionar estudiante
             <select
               value={attendanceDancerId}
               onChange={(event) => setAttendanceDancerId(event.target.value)}
             >
-              <option value="">Selecciona una bailarina</option>
+              <option value="">Selecciona una estudiante</option>
               {dancers.map((dancer) => (
                 <option key={dancer.id} value={dancer.id}>{dancer.name}</option>
               ))}
@@ -894,8 +894,8 @@ function InstructorDashboard({ user }: { user: User | null }) {
               ×
             </button>
 
-            <p className="eyebrow">NUEVA BAILARINA</p>
-            <h2>Añadir bailarina</h2>
+            <p className="eyebrow">NUEVA Estudiante</p>
+            <h2>Añadir estudiante</h2>
 
             <label>
               Nombre completo
@@ -941,7 +941,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
             </p>
 
             <button className="primary-button" type="submit">
-              Guardar bailarina
+              Guardar estudiante
             </button>
           </form>
         </div>
