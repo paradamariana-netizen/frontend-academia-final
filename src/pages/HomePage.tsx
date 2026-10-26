@@ -180,7 +180,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
   const saveAttendance = (dancerId: string, date: string) => {
     if (!dancerId) {
-      window.alert("Selecciona una estudiante primero.");
+      window.alert("Selecciona un estudiante primero.");
       return;
     }
 
@@ -202,7 +202,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     storageService.set<AttendanceRecord[]>(ATTENDANCE_KEY, updated);
     setAttendanceRecords(updated);
 
-    // Actualizar el porcentaje de asistencia de la estudiante.
+    // Actualizar el porcentaje de asistencia del estudiante.
     const dancerRecords = updated.filter(
       (record) => record.dancerId === dancerId
     );
@@ -423,7 +423,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const success = dancerRepository.deleteDancer(dancer.id);
 
     if (!success) {
-      window.alert("No se pudo eliminar la estudiante.");
+      window.alert("No se pudo eliminar al estudiante.");
       return;
     }
 
@@ -433,7 +433,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     // Actualizar el historial de evaluaciones.
     setEvaluationHistory(dancerRepository.getEvaluations());
 
-    // Limpiar la selección si corresponde a la estudiante eliminada.
+    // Limpiar la selección si corresponde al estudiante eliminado.
     if (selectedDancer?.id === dancer.id) {
       setSelectedDancer(null);
     }
@@ -801,7 +801,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
               <p className="eyebrow">CONTROL DIARIO</p>
               <h2>Asistencia de estudiantes</h2>
               <p className="subtitle">
-                Selecciona una estudiante y marca el estado de cada fecha del calendario.
+                Selecciona un estudiante y marca el estado de cada fecha del calendario.
               </p>
             </div>
           </div>
@@ -812,7 +812,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
               value={attendanceDancerId}
               onChange={(event) => setAttendanceDancerId(event.target.value)}
             >
-              <option value="">Selecciona una estudiante</option>
+              <option value="">Selecciona un estudiante</option>
               {dancers.map((dancer) => (
                 <option key={dancer.id} value={dancer.id}>{dancer.name}</option>
               ))}
@@ -894,7 +894,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
               ×
             </button>
 
-            <p className="eyebrow">NUEVA Estudiante</p>
+            <p className="eyebrow">NUEVO ESTUDIANTE</p>
             <h2>Añadir estudiante</h2>
 
             <label>
