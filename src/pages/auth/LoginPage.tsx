@@ -63,7 +63,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
       <section className="login-panel">
         <div className="mobile-brand">
-          <span className="brand-mark">a</span> academia
+          <span className="brand-mark">B</span> Academia de Danza Bailarte
         </div>
 
         <LoginForm error={error} onSubmit={handleLogin} />
