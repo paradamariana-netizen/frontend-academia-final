@@ -103,7 +103,7 @@ function Layout({
     <main className="dashboard-shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark">S</span>
+          <span className="brand-mark">B</span>
           <span>
             Academia de Danza <strong>Bailarte</strong>
           </span>
