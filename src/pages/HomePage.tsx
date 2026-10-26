@@ -1081,8 +1081,7 @@ function AdminDashboard({ user }: { user: User | null }) {
               Gestión de instructores <span>✦</span>
             </h1>
             <p className="subtitle">
-              Añade, consulta o retira el acceso de instructores de Studio
-              Allegra.
+              Añade, consulta o retira el acceso de instructores de Academia de Danza Bailarte.
             </p>
           </div>
         </header>
