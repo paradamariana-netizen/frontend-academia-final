@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { authRepository } from "../repositories/authRepository";
 import { dancerRepository } from "../repositories/dancerRepository";
 import { paymentRepository } from "../repositories/paymentRepository";
-import type { User } from "../types/auth";
 import type { Dancer } from "../types/dancer";
 import type { PaymentRecord } from "../types/payment";
 
