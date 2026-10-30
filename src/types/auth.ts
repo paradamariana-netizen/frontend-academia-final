@@ -5,6 +5,7 @@ export interface User {
   name: string;
   carnet: string;
   role: UserRole;
+  groupId?: string;
 }
 
 export interface UserRecord extends User {
