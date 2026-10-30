@@ -27,6 +27,15 @@ function AdminPage() {
     const success = authRepository.updateInstructorGroup(instructorId, groupId);
     if (!success) {
       window.alert("Ese grupo ya tiene un instructor asignado. Cada grupo debe tener un solo responsable.");
+    }
+    setInstructors(authRepository.getInstructors());
+  };
+  const groups = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
+
+  const assignGroup = (instructorId: string, groupId: string) => {
+    const success = authRepository.updateInstructorGroup(instructorId, groupId);
+    if (!success) {
+      window.alert("Ese grupo ya tiene un instructor asignado. Cada grupo debe tener un solo responsable.");
       setInstructors(authRepository.getInstructors());
       return;
     }
