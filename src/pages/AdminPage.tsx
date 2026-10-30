@@ -28,7 +28,7 @@ function AdminPage() {
     setDancers(dancerRepository.getDancers());
   };
 
-  const assignGroup = (instructorId: string, groupId: string) => {
+  const assignGroup = (instructorId: string, groupId: DanceGroup | "") => {
     const success = authRepository.updateInstructorGroup(instructorId, groupId);
     if (!success) {
       window.alert("Ese grupo ya tiene un instructor asignado. Cada grupo debe tener un solo responsable.");
@@ -169,7 +169,7 @@ function AdminPage() {
           <div className="table-wrap">
             <table>
               <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th><th>GRUPO ASIGNADO</th></tr></thead>
-              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td><td><select aria-label={`Grupo de ${instructor.name}`} value={instructor.groupId ?? ""} onChange={(event) => assignGroup(instructor.id, event.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td></tr>)}</tbody>
+              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td><td><select aria-label={`Grupo de ${instructor.name}`} value={instructor.groupId ?? ""} onChange={(event) => assignGroup(instructor.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td></tr>)}</tbody>
             </table>
           </div>
         </section>
