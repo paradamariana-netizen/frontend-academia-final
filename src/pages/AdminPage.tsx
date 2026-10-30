@@ -21,7 +21,58 @@ function AdminPage() {
   const [instructors, setInstructors] = useState(() => authRepository.getInstructors());
   const [payments, setPayments] = useState<PaymentRecord[]>(() => paymentRepository.getPayments());
   const [search, setSearch] = useState("");
+  const [showInstructorForm, setShowInstructorForm] = useState(false);
+  const [showDancerForm, setShowDancerForm] = useState(false);
+  const [instructorName, setInstructorName] = useState("");
+  const [instructorCarnet, setInstructorCarnet] = useState("");
+  const [instructorPassword, setInstructorPassword] = useState("");
+  const [instructorError, setInstructorError] = useState("");
+  const [dancerName, setDancerName] = useState("");
+  const [dancerAge, setDancerAge] = useState("");
+  const [dancerLevel, setDancerLevel] = useState<"Iniciación" | "Intermedio" | "Avanzado">("Iniciación");
+  const [newDancerGroup, setNewDancerGroup] = useState<DanceGroup | "">("");
+
   const groups: DanceGroup[] = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
+
+  const addInstructor = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const created = authRepository.addInstructor({
+      name: instructorName.trim(),
+      carnet: instructorCarnet.trim(),
+      password: instructorPassword,
+    });
+    if (!created) {
+      setInstructorError("Ese carnet ya está registrado.");
+      return;
+    }
+    setInstructors(authRepository.getInstructors());
+    setInstructorName("");
+    setInstructorCarnet("");
+    setInstructorPassword("");
+    setInstructorError("");
+    setShowInstructorForm(false);
+  };
+
+  const addDancer = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const age = Number(dancerAge);
+    if (!Number.isInteger(age) || age < 5 || age > 35) {
+      window.alert("La edad debe estar entre 5 y 35 años.");
+      return;
+    }
+    dancerRepository.addDancer({
+      name: dancerName.trim(),
+      age,
+      level: dancerLevel,
+      ...(newDancerGroup ? { groupId: newDancerGroup } : {}),
+    });
+    setDancers(dancerRepository.getDancers());
+    setDancerName("");
+    setDancerAge("");
+    setDancerLevel("Iniciación");
+    setNewDancerGroup("");
+    setShowDancerForm(false);
+  };
 
   const assignDancerGroup = (dancerId: string, groupId: DanceGroup | "") => {
     dancerRepository.updateGroup(dancerId, groupId);
@@ -165,7 +216,10 @@ function AdminPage() {
         </section>
 
         <section className="dancers-section" id="instructores">
-          <div className="section-heading"><div><p className="eyebrow">EQUIPO DOCENTE</p><h2>Instructores</h2></div></div>
+          <div className="section-heading">
+            <div><p className="eyebrow">EQUIPO DOCENTE</p><h2>Instructores</h2></div>
+            <button type="button" className="primary-button" onClick={() => setShowInstructorForm(true)}>＋ Añadir instructor</button>
+          </div>
           <div className="table-wrap">
             <table>
               <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th><th>GRUPO ASIGNADO</th></tr></thead>
@@ -174,6 +228,36 @@ function AdminPage() {
           </div>
         </section>
       </section>
+
+      {showInstructorForm && (
+        <div className="modal-backdrop">
+          <form className="modal" onSubmit={addInstructor}>
+            <button type="button" className="modal-close" onClick={() => { setShowInstructorForm(false); setInstructorError(""); }}>×</button>
+            <p className="eyebrow">NUEVO ACCESO</p>
+            <h2>Añadir instructor</h2>
+            <label>Nombre completo<input value={instructorName} onChange={(event) => setInstructorName(event.target.value)} required placeholder="Nombre del instructor" /></label>
+            <label>Carnet de identidad<input value={instructorCarnet} onChange={(event) => setInstructorCarnet(event.target.value)} required placeholder="Número de carnet" /></label>
+            <label>Contraseña temporal<input type="password" value={instructorPassword} onChange={(event) => setInstructorPassword(event.target.value)} minLength={6} required placeholder="Mínimo 6 caracteres" /></label>
+            {instructorError && <p className="form-error" role="alert">{instructorError}</p>}
+            <button className="primary-button" type="submit">Crear instructor</button>
+          </form>
+        </div>
+      )}
+
+      {showDancerForm && (
+        <div className="modal-backdrop">
+          <form className="modal" onSubmit={addDancer}>
+            <button type="button" className="modal-close" onClick={() => setShowDancerForm(false)}>×</button>
+            <p className="eyebrow">NUEVO REGISTRO</p>
+            <h2>Añadir estudiante</h2>
+            <label>Nombre completo<input value={dancerName} onChange={(event) => setDancerName(event.target.value)} required placeholder="Nombre de la bailarina" /></label>
+            <label>Edad<input type="number" min="5" max="35" value={dancerAge} onChange={(event) => setDancerAge(event.target.value)} required /></label>
+            <label>Grupo asignado<select value={newDancerGroup} onChange={(event) => setNewDancerGroup(event.target.value as DanceGroup | "")}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></label>
+            <label>Nivel<select value={dancerLevel} onChange={(event) => setDancerLevel(event.target.value as typeof dancerLevel)}><option>Iniciación</option><option>Intermedio</option><option>Avanzado</option></select></label>
+            <button className="primary-button" type="submit">Guardar estudiante</button>
+          </form>
+        </div>
+      )}
     </main>
   );
 }
