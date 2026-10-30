@@ -165,7 +165,7 @@ function Layout({
 
 function InstructorDashboard({ user }: { user: User | null }) {
   const [dancers, setDancers] = useState<Dancer[]>(() =>
-    dancerRepository.getDancers()
+    dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId)
   );
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(
     () => getAttendanceRecords()
@@ -387,6 +387,16 @@ function InstructorDashboard({ user }: { user: User | null }) {
     event.preventDefault();
 
     const age = Number(dancerAge);
+
+    if (!user?.groupId) {
+      window.alert("El administrador debe asignarte un grupo antes de registrar estudiantes.");
+      return;
+    }
+
+    if (getAgeCategory(age) !== user.groupId) {
+      window.alert(`Solo puedes registrar estudiantes del grupo ${user.groupId}.`);
+      return;
+    }
 
     if (
       !dancerName.trim() ||
