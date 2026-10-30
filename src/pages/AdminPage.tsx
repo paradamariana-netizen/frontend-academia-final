@@ -30,7 +30,6 @@ function AdminPage() {
     }
     setInstructors(authRepository.getInstructors());
   };
-  const groups = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
 
   const assignGroup = (instructorId: string, groupId: string) => {
     const success = authRepository.updateInstructorGroup(instructorId, groupId);
@@ -172,8 +171,8 @@ function AdminPage() {
           <div className="section-heading"><div><p className="eyebrow">EQUIPO DOCENTE</p><h2>Instructores</h2></div></div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th></tr></thead>
-              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td></tr>)}</tbody>
+              <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th><th>GRUPO ASIGNADO</th></tr></thead>
+              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td><td><select aria-label={`Grupo de ${instructor.name}`} value={instructor.groupId ?? ""} onChange={(event) => assignGroup(instructor.id, event.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td></tr>)}</tbody>
             </table>
           </div>
         </section>
