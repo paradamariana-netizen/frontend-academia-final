@@ -165,7 +165,7 @@ function Layout({
 
 function InstructorDashboard({ user }: { user: User | null }) {
   const [dancers, setDancers] = useState<Dancer[]>(() =>
-    dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId)
+    dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId)
   );
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(
     () => getAttendanceRecords()
@@ -226,7 +226,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
       attendancePercentage
     );
 
-    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId));
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
   };
 
   const daysInMonth = new Date(
@@ -359,7 +359,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     dancerRepository.updateScore(selectedDancer.id, overallScore);
 
     // Recargar los datos guardados para actualizar la pantalla.
-    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId));
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
     setEvaluationHistory(dancerRepository.getEvaluations().filter((evaluation) => dancers.some((dancer) => dancer.id === evaluation.dancerId)));
 
     // Cerrar el cuadro después de guardar.
@@ -403,11 +403,6 @@ function InstructorDashboard({ user }: { user: User | null }) {
       return;
     }
 
-    if (getAgeCategory(age) !== user.groupId) {
-      window.alert(`Solo puedes registrar estudiantes del grupo ${user.groupId}.`);
-      return;
-    }
-
     if (
       !dancerName.trim() ||
       dancerAge.trim() === "" ||
@@ -422,6 +417,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const created = dancerRepository.addDancer({
       name: dancerName.trim(),
       age,
+      groupId: user.groupId,
       level: dancerLevel,
     });
 
@@ -450,7 +446,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     }
 
     // Actualizar la lista de estudiantes.
-    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId));
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
 
     // Actualizar el historial de evaluaciones.
     setEvaluationHistory(dancerRepository.getEvaluations());
@@ -491,7 +487,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const success = dancerRepository.confirmPromotion(evaluation.id);
 
     if (success) {
-      setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && getAgeCategory(dancer.age) === user?.groupId));
+      setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
       setEvaluationHistory(dancerRepository.getEvaluations());
       window.alert("Ascenso de nivel registrado correctamente.");
     } else {
