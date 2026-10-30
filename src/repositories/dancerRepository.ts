@@ -1,6 +1,6 @@
 
 import { storageService } from "../services/storageService";
-import type { Dancer, NewDancer, DanceLevel } from "../types/dancer";
+import type { Dancer, NewDancer, DanceLevel, DanceGroup } from "../types/dancer";
 
 const DANCERS_KEY = "app_dancers";
 const EVALUATIONS_KEY = "app_dancer_evaluations";
@@ -138,6 +138,15 @@ export const dancerRepository = {
   },
 
 
+  updateGroup(id: string, groupId: DanceGroup | ""): boolean {
+    const dancers = getDancers();
+    if (!dancers.some((dancer) => dancer.id === id)) return false;
+    storageService.set<Dancer[]>(DANCERS_KEY, dancers.map((dancer) =>
+      dancer.id === id ? { ...dancer, groupId: groupId || undefined } : dancer
+    ));
+    return true;
+  },
+
   getEvaluationsByDancer(dancerId: string): DancerEvaluation[] {
     return getEvaluations()
       .filter((evaluation) => evaluation.dancerId === dancerId)
@@ -152,6 +161,7 @@ export const dancerRepository = {
       name: dancer.name,
       initials: initialsFromName(dancer.name),
       age: dancer.age,
+      groupId: dancer.groupId,
       level: dancer.level,
       attendance: 0,
       score: 0,

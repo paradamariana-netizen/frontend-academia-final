@@ -165,7 +165,7 @@ function Layout({
 
 function InstructorDashboard({ user }: { user: User | null }) {
   const [dancers, setDancers] = useState<Dancer[]>(() =>
-    dancerRepository.getDancers()
+    dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId)
   );
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(
     () => getAttendanceRecords()
@@ -226,7 +226,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
       attendancePercentage
     );
 
-    setDancers(dancerRepository.getDancers());
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
   };
 
   const daysInMonth = new Date(
@@ -259,7 +259,10 @@ function InstructorDashboard({ user }: { user: User | null }) {
   const [feedback, setFeedback] = useState("");
 
   const [evaluationHistory, setEvaluationHistory] =
-    useState<DancerEvaluation[]>(() => dancerRepository.getEvaluations());
+    useState<DancerEvaluation[]>(() => {
+      const allowedIds = new Set(dancers.map((dancer) => dancer.id));
+      return dancerRepository.getEvaluations().filter((evaluation) => allowedIds.has(evaluation.dancerId));
+    });
 
   const [isAddingDancer, setIsAddingDancer] = useState(false);
   const [dancerName, setDancerName] = useState("");
@@ -356,8 +359,8 @@ function InstructorDashboard({ user }: { user: User | null }) {
     dancerRepository.updateScore(selectedDancer.id, overallScore);
 
     // Recargar los datos guardados para actualizar la pantalla.
-    setDancers(dancerRepository.getDancers());
-    setEvaluationHistory(dancerRepository.getEvaluations());
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
+    setEvaluationHistory(dancerRepository.getEvaluations().filter((evaluation) => dancers.some((dancer) => dancer.id === evaluation.dancerId)));
 
     // Cerrar el cuadro después de guardar.
     setSelectedDancer(null);
@@ -366,12 +369,19 @@ function InstructorDashboard({ user }: { user: User | null }) {
     setFeedback("");
 
     window.alert(
-      `Evaluación registrada correctamente.\n\n` +
-      `Estudiante: ${selectedDancer.name}\n` +
-      `Examen escrito: ${written}/100\n` +
-      `Promedio práctico: ${practicalAverage.toFixed(2)}/5\n` +
-      `Rendimiento general: ${overallScore}/10\n` +
-      `Resultado: ${approved ? "APROBADA" : "NO APROBADA"}\n` +
+      `Evaluación registrada correctamente.
+
+` +
+      `Estudiante: ${selectedDancer.name}
+` +
+      `Examen escrito: ${written}/100
+` +
+      `Promedio práctico: ${practicalAverage.toFixed(2)}/5
+` +
+      `Rendimiento general: ${overallScore}/10
+` +
+      `Resultado: ${approved ? "APROBADA" : "NO APROBADA"}
+` +
       `Nivel recomendado: ${recommendedLevel}`
     );
   } catch (error) {
@@ -388,6 +398,11 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
     const age = Number(dancerAge);
 
+    if (!user?.groupId) {
+      window.alert("El administrador debe asignarte un grupo antes de registrar estudiantes.");
+      return;
+    }
+
     if (
       !dancerName.trim() ||
       dancerAge.trim() === "" ||
@@ -402,6 +417,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const created = dancerRepository.addDancer({
       name: dancerName.trim(),
       age,
+      groupId: user.groupId,
       level: dancerLevel,
     });
 
@@ -414,7 +430,9 @@ function InstructorDashboard({ user }: { user: User | null }) {
   
   const deleteDancer = (dancer: Dancer) => {
     const confirmed = window.confirm(
-      `¿Estás segura de que deseas eliminar a ${dancer.name}?\n\n` +
+      `¿Estás segura de que deseas eliminar a ${dancer.name}?
+
+` +
       "Esta acción eliminará también su historial de evaluaciones y no se puede deshacer."
     );
 
@@ -428,7 +446,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     }
 
     // Actualizar la lista de estudiantes.
-    setDancers(dancerRepository.getDancers());
+    setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
 
     // Actualizar el historial de evaluaciones.
     setEvaluationHistory(dancerRepository.getEvaluations());
@@ -469,7 +487,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
     const success = dancerRepository.confirmPromotion(evaluation.id);
 
     if (success) {
-      setDancers(dancerRepository.getDancers());
+      setDancers(dancerRepository.getDancers().filter((dancer) => Boolean(user?.groupId) && dancer.groupId === user?.groupId));
       setEvaluationHistory(dancerRepository.getEvaluations());
       window.alert("Ascenso de nivel registrado correctamente.");
     } else {

@@ -2,6 +2,7 @@
 import initialUsers from "../data/users.json";
 import { storageService } from "../services/storageService";
 import type { LoginCredentials, User, UserRecord } from "../types/auth";
+import type { DanceGroup } from "../types/dancer";
 
 const SESSION_KEY = "app_session";
 const USERS_KEY = "app_users";
@@ -18,11 +19,12 @@ const getUsers = (): UserRecord[] => {
   return savedUsers;
 };
 
-const toUser = ({ id, name, carnet, role }: UserRecord): User => ({
+const toUser = ({ id, name, carnet, role, groupId }: UserRecord): User => ({
   id,
   name,
   carnet,
   role,
+  groupId,
 });
 
 const saveUsers = (users: UserRecord[]) => {
@@ -78,6 +80,32 @@ export const authRepository = {
     return toUser(created);
   },
 
+  updateInstructorGroup(id: string, groupId: DanceGroup | ""): boolean {
+    const users = getUsers();
+    const instructor = users.find((user) => user.id === id && user.role === "INSTRUCTOR");
+    if (!instructor) return false;
+
+    // Un grupo solo puede tener un instructor responsable.
+    if (groupId && users.some((user) => user.role === "INSTRUCTOR" && user.id !== id && user.groupId === groupId)) {
+      return false;
+    }
+
+    const updatedUsers: UserRecord[] = users.map((user) => {
+      if (user.id !== id) return user;
+
+      const updatedUser = { ...user };
+      if (groupId) {
+        updatedUser.groupId = groupId;
+      } else {
+        delete updatedUser.groupId;
+      }
+      return updatedUser;
+    });
+
+    saveUsers(updatedUsers);
+    return true;
+  },
+
   removeInstructor(id: string): void {
     saveUsers(
       getUsers().filter(
@@ -91,7 +119,12 @@ export const authRepository = {
   },
 
   getCurrentUser(): User | null {
-    return storageService.get<User>(SESSION_KEY);
+    const sessionUser = storageService.get<User>(SESSION_KEY);
+    if (!sessionUser) return null;
+
+    // Leer el grupo actualizado desde el registro del usuario, no desde una sesión antigua.
+    const currentRecord = getUsers().find((user) => user.id === sessionUser.id);
+    return currentRecord ? toUser(currentRecord) : sessionUser;
   },
 
   isAuthenticated(): boolean {
