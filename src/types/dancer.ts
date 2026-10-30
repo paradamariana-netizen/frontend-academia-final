@@ -18,6 +18,7 @@ export interface Dancer {
 export interface NewDancer {
   name: string;
   age: number;
+  groupId?: DanceGroup;
   level: DanceLevel;
 }
 
