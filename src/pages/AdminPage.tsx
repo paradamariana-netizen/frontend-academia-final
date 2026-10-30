@@ -17,11 +17,16 @@ function getAgeCategory(age: number): string {
 function AdminPage() {
   const navigate = useNavigate();
   const user = authRepository.getCurrentUser();
-  const [dancers] = useState<Dancer[]>(() => dancerRepository.getDancers());
+  const [dancers, setDancers] = useState<Dancer[]>(() => dancerRepository.getDancers());
   const [instructors, setInstructors] = useState(() => authRepository.getInstructors());
   const [payments, setPayments] = useState<PaymentRecord[]>(() => paymentRepository.getPayments());
   const [search, setSearch] = useState("");
   const groups = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
+
+  const assignDancerGroup = (dancerId: string, groupId: string) => {
+    dancerRepository.updateGroup(dancerId, groupId);
+    setDancers(dancerRepository.getDancers());
+  };
 
   const assignGroup = (instructorId: string, groupId: string) => {
     const success = authRepository.updateInstructorGroup(instructorId, groupId);
@@ -146,12 +151,12 @@ function AdminPage() {
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>CATEGORÍA</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th></tr></thead>
+              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>CATEGORÍA</th><th>GRUPO ASIGNADO</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th></tr></thead>
               <tbody>
                 {visibleDancers.map((dancer) => (
                   <tr key={dancer.id}>
                     <td><div className="dancer-name"><span className={`avatar ${dancer.color}`}>{dancer.initials}</span><strong>{dancer.name}</strong></div></td>
-                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td>
+                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td>
                   </tr>
                 ))}
               </tbody>
