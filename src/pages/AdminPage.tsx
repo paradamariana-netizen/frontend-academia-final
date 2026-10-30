@@ -186,13 +186,15 @@ function AdminPage() {
 
           <div className="table-wrap">
             <table>
-              <thead><tr><th>ESTUDIANTE</th><th>NIVEL</th><th>MES</th><th>MONTO</th><th>ESTADO</th><th>FECHA</th><th></th></tr></thead>
+              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>GRUPO</th><th>NIVEL</th><th>MES</th><th>MONTO</th><th>ESTADO</th><th>FECHA</th><th></th></tr></thead>
               <tbody>
                 {payments.map((payment) => {
                   const dancer = dancers.find((item) => item.id === payment.dancerId);
                   return (
                     <tr key={payment.id}>
-                      <td><strong>{payment.dancerName}</strong></td>
+                      <td><strong>{dancer?.name ?? payment.dancerName}</strong></td>
+                      <td>{dancer?.age ?? "—"}</td>
+                      <td>{dancer?.groupId ?? "Sin asignar"}</td>
                       <td>{dancer?.level ?? "—"}</td>
                       <td>{new Date(`${payment.month}-02T12:00:00`).toLocaleDateString("es-BO", { month: "long", year: "numeric" })}</td>
                       <td>Bs. {payment.amount.toFixed(0)}</td>
