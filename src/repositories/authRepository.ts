@@ -106,7 +106,12 @@ export const authRepository = {
   },
 
   getCurrentUser(): User | null {
-    return storageService.get<User>(SESSION_KEY);
+    const sessionUser = storageService.get<User>(SESSION_KEY);
+    if (!sessionUser) return null;
+
+    // Leer el grupo actualizado desde el registro del usuario, no desde una sesión antigua.
+    const currentRecord = getUsers().find((user) => user.id === sessionUser.id);
+    return currentRecord ? toUser(currentRecord) : sessionUser;
   },
 
   isAuthenticated(): boolean {
