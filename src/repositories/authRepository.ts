@@ -90,7 +90,19 @@ export const authRepository = {
       return false;
     }
 
-    saveUsers(users.map((user) => user.id === id ? { ...user, groupId } : user));
+    const updatedUsers: UserRecord[] = users.map((user) => {
+      if (user.id !== id) return user;
+
+      const updatedUser = { ...user };
+      if (groupId) {
+        updatedUser.groupId = groupId;
+      } else {
+        delete updatedUser.groupId;
+      }
+      return updatedUser;
+    });
+
+    saveUsers(updatedUsers);
     return true;
   },
 
