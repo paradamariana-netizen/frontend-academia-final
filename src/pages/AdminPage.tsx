@@ -74,6 +74,26 @@ function AdminPage() {
     setShowDancerForm(false);
   };
 
+  const removeDancer = (dancer: Dancer) => {
+    const confirmed = window.confirm(
+      `¿Eliminar a ${dancer.name}? También se quitarán sus asistencias, evaluaciones y mensualidades. Esta acción no se puede deshacer.`
+    );
+    if (!confirmed) return;
+    if (dancerRepository.deleteDancer(dancer.id)) {
+      setDancers(dancerRepository.getDancers());
+      setPayments(paymentRepository.getPayments());
+    }
+  };
+
+  const removeInstructor = (instructorId: string, instructorName: string) => {
+    const confirmed = window.confirm(
+      `¿Eliminar al instructor/a ${instructorName}? Ya no podrá iniciar sesión en el sistema.`
+    );
+    if (!confirmed) return;
+    authRepository.removeInstructor(instructorId);
+    setInstructors(authRepository.getInstructors());
+  };
+
   const assignDancerGroup = (dancerId: string, groupId: DanceGroup | "") => {
     dancerRepository.updateGroup(dancerId, groupId);
     setDancers(dancerRepository.getDancers());
@@ -203,12 +223,12 @@ function AdminPage() {
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>CATEGORÍA</th><th>GRUPO ASIGNADO</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th></tr></thead>
+              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>CATEGORÍA</th><th>GRUPO ASIGNADO</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th><th>ACCIÓN</th></tr></thead>
               <tbody>
                 {visibleDancers.map((dancer) => (
                   <tr key={dancer.id}>
                     <td><div className="dancer-name"><span className={`avatar ${dancer.color}`}>{dancer.initials}</span><strong>{dancer.name}</strong></div></td>
-                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td>
+                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td><td><button type="button" className="evaluate" onClick={() => removeDancer(dancer)}>Eliminar</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -223,8 +243,8 @@ function AdminPage() {
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th><th>GRUPO ASIGNADO</th></tr></thead>
-              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td><td><select aria-label={`Grupo de ${instructor.name}`} value={instructor.groupId ?? ""} onChange={(event) => assignGroup(instructor.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td></tr>)}</tbody>
+              <thead><tr><th>INSTRUCTOR</th><th>CARNET</th><th>ROL</th><th>GRUPO ASIGNADO</th><th>ACCIÓN</th></tr></thead>
+              <tbody>{instructors.map((instructor) => <tr key={instructor.id}><td><strong>{instructor.name}</strong></td><td>{instructor.carnet}</td><td>Instructor/a</td><td><select aria-label={`Grupo de ${instructor.name}`} value={instructor.groupId ?? ""} onChange={(event) => assignGroup(instructor.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td><button type="button" className="evaluate" onClick={() => removeInstructor(instructor.id, instructor.name)}>Eliminar</button></td></tr>)}</tbody>
             </table>
           </div>
         </section>

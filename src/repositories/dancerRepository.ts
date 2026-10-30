@@ -4,6 +4,8 @@ import type { Dancer, NewDancer, DanceLevel, DanceGroup } from "../types/dancer"
 
 const DANCERS_KEY = "app_dancers";
 const EVALUATIONS_KEY = "app_dancer_evaluations";
+const ATTENDANCE_KEY = "app_attendance";
+const PAYMENTS_KEY = "app_payments";
 
 const colors: Dancer["color"][] = [
   "violet",
@@ -126,13 +128,17 @@ export const dancerRepository = {
       dancers.filter((dancer) => dancer.id !== id)
     );
 
-    // Eliminar las evaluaciones asociadas a esa estudiante.
+    // Eliminar los registros relacionados para evitar datos huérfanos.
     storageService.set<DancerEvaluation[]>(
       EVALUATIONS_KEY,
-      getEvaluations().filter(
-        (evaluation) => evaluation.dancerId !== id
-      )
+      getEvaluations().filter((evaluation) => evaluation.dancerId !== id)
     );
+
+    const attendance = storageService.get<{ dancerId: string }[]>(ATTENDANCE_KEY) ?? [];
+    storageService.set(ATTENDANCE_KEY, attendance.filter((record) => record.dancerId !== id));
+
+    const payments = storageService.get<{ dancerId: string }[]>(PAYMENTS_KEY) ?? [];
+    storageService.set(PAYMENTS_KEY, payments.filter((record) => record.dancerId !== id));
 
     return true;
   },
