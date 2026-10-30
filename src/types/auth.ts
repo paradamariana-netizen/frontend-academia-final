@@ -1,3 +1,5 @@
+import type { DanceGroup } from "./dancer";
+
 export type UserRole = "ADMIN" | "INSTRUCTOR";
 
 export interface User {
@@ -5,7 +7,7 @@ export interface User {
   name: string;
   carnet: string;
   role: UserRole;
-  groupId?: string;
+  groupId?: DanceGroup;
 }
 
 export interface UserRecord extends User {
