@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { authRepository } from "../repositories/authRepository";
 import { dancerRepository } from "../repositories/dancerRepository";
 import { paymentRepository } from "../repositories/paymentRepository";
-import type { Dancer } from "../types/dancer";
+import type { Dancer, DanceGroup } from "../types/dancer";
 import type { PaymentRecord } from "../types/payment";
 
 function getAgeCategory(age: number): string {
@@ -21,9 +21,9 @@ function AdminPage() {
   const [instructors, setInstructors] = useState(() => authRepository.getInstructors());
   const [payments, setPayments] = useState<PaymentRecord[]>(() => paymentRepository.getPayments());
   const [search, setSearch] = useState("");
-  const groups = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
+  const groups: DanceGroup[] = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
 
-  const assignDancerGroup = (dancerId: string, groupId: string) => {
+  const assignDancerGroup = (dancerId: string, groupId: DanceGroup | "") => {
     dancerRepository.updateGroup(dancerId, groupId);
     setDancers(dancerRepository.getDancers());
   };
@@ -156,7 +156,7 @@ function AdminPage() {
                 {visibleDancers.map((dancer) => (
                   <tr key={dancer.id}>
                     <td><div className="dancer-name"><span className={`avatar ${dancer.color}`}>{dancer.initials}</span><strong>{dancer.name}</strong></div></td>
-                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td>
+                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td>
                   </tr>
                 ))}
               </tbody>
