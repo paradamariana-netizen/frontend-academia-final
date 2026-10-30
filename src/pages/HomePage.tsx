@@ -259,7 +259,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
   const [feedback, setFeedback] = useState("");
 
   const [evaluationHistory, setEvaluationHistory] =
-    useState<DancerEvaluation[]>(() => dancerRepository.getEvaluations());
+    useState<DancerEvaluation[]>(() => {\n      const allowedIds = new Set(dancers.map((dancer) => dancer.id));\n      return dancerRepository.getEvaluations().filter((evaluation) => allowedIds.has(evaluation.dancerId));\n    });
 
   const [isAddingDancer, setIsAddingDancer] = useState(false);
   const [dancerName, setDancerName] = useState("");
@@ -357,7 +357,7 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
     // Recargar los datos guardados para actualizar la pantalla.
     setDancers(dancerRepository.getDancers());
-    setEvaluationHistory(dancerRepository.getEvaluations());
+    setEvaluationHistory(dancerRepository.getEvaluations().filter((evaluation) => dancers.some((dancer) => dancer.id === evaluation.dancerId)));
 
     // Cerrar el cuadro después de guardar.
     setSelectedDancer(null);
