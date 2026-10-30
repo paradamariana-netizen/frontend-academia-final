@@ -18,11 +18,12 @@ const getUsers = (): UserRecord[] => {
   return savedUsers;
 };
 
-const toUser = ({ id, name, carnet, role }: UserRecord): User => ({
+const toUser = ({ id, name, carnet, role, groupId }: UserRecord): User => ({
   id,
   name,
   carnet,
   role,
+  groupId,
 });
 
 const saveUsers = (users: UserRecord[]) => {
@@ -76,6 +77,20 @@ export const authRepository = {
     saveUsers([...users, created]);
 
     return toUser(created);
+  },
+
+  updateInstructorGroup(id: string, groupId: string): boolean {
+    const users = getUsers();
+    const instructor = users.find((user) => user.id === id && user.role === "INSTRUCTOR");
+    if (!instructor) return false;
+
+    // Un grupo solo puede tener un instructor responsable.
+    if (users.some((user) => user.role === "INSTRUCTOR" && user.id !== id && user.groupId === groupId)) {
+      return false;
+    }
+
+    saveUsers(users.map((user) => user.id === id ? { ...user, groupId } : user));
+    return true;
   },
 
   removeInstructor(id: string): void {
