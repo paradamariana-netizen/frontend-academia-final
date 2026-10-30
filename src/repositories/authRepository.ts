@@ -2,6 +2,7 @@
 import initialUsers from "../data/users.json";
 import { storageService } from "../services/storageService";
 import type { LoginCredentials, User, UserRecord } from "../types/auth";
+import type { DanceGroup } from "../types/dancer";
 
 const SESSION_KEY = "app_session";
 const USERS_KEY = "app_users";
@@ -79,7 +80,7 @@ export const authRepository = {
     return toUser(created);
   },
 
-  updateInstructorGroup(id: string, groupId: string): boolean {
+  updateInstructorGroup(id: string, groupId: DanceGroup | ""): boolean {
     const users = getUsers();
     const instructor = users.find((user) => user.id === id && user.role === "INSTRUCTOR");
     if (!instructor) return false;
