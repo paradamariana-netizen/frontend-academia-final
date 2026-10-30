@@ -6,14 +6,6 @@ import { paymentRepository } from "../repositories/paymentRepository";
 import type { Dancer, DanceGroup } from "../types/dancer";
 import type { PaymentRecord } from "../types/payment";
 
-function getAgeCategory(age: number): string {
-  if (age >= 5 && age <= 9) return "Infantil";
-  if (age >= 10 && age <= 14) return "Pre-juvenil";
-  if (age >= 15 && age <= 18) return "Juvenil";
-  if (age >= 19 && age <= 35) return "Mayores";
-  return "Sin categoría";
-}
-
 function AdminPage() {
   const navigate = useNavigate();
   const user = authRepository.getCurrentUser();
@@ -223,12 +215,12 @@ function AdminPage() {
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>CATEGORÍA</th><th>GRUPO ASIGNADO</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th><th>ACCIÓN</th></tr></thead>
+              <thead><tr><th>ESTUDIANTE</th><th>EDAD</th><th>GRUPO ASIGNADO</th><th>NIVEL</th><th>ASISTENCIA</th><th>RENDIMIENTO</th><th>ACCIÓN</th></tr></thead>
               <tbody>
                 {visibleDancers.map((dancer) => (
                   <tr key={dancer.id}>
                     <td><div className="dancer-name"><span className={`avatar ${dancer.color}`}>{dancer.initials}</span><strong>{dancer.name}</strong></div></td>
-                    <td>{dancer.age}</td><td>{getAgeCategory(dancer.age)}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td><td><button type="button" className="evaluate" onClick={() => removeDancer(dancer)}>Eliminar</button></td>
+                    <td>{dancer.age}</td><td><select aria-label={`Grupo de ${dancer.name}`} value={dancer.groupId ?? ""} onChange={(event) => assignDancerGroup(dancer.id, event.target.value as DanceGroup | "")} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e5e7eb" }}><option value="">Sin asignar</option>{groups.map((group) => <option key={group} value={group}>{group}</option>)}</select></td><td>{dancer.level}</td><td>{dancer.attendance}%</td><td>★ {dancer.score || "—"}</td><td><button type="button" className="evaluate" onClick={() => removeDancer(dancer)}>Eliminar</button></td>
                   </tr>
                 ))}
               </tbody>
