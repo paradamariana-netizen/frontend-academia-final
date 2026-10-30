@@ -178,7 +178,19 @@ function InstructorDashboard({ user }: { user: User | null }) {
   const [attendanceStatus, setAttendanceStatus] =
     useState<AttendanceStatus>("asistencia");
 
+  const isDancerInAssignedGroup = (dancerId: string) => {
+    if (!user?.groupId) return false;
+    return dancerRepository.getDancers().some(
+      (dancer) => dancer.id === dancerId && dancer.groupId === user.groupId
+    );
+  };
+
   const saveAttendance = (dancerId: string, date: string) => {
+    if (!user?.groupId || !isDancerInAssignedGroup(dancerId)) {
+      window.alert("Solo puedes registrar asistencia a estudiantes de tu grupo asignado.");
+      return;
+    }
+
     if (!dancerId) {
       window.alert("Selecciona un estudiante primero.");
       return;
@@ -290,6 +302,10 @@ function InstructorDashboard({ user }: { user: User | null }) {
   );
 
   const openEvaluation = (dancer: Dancer) => {
+    if (!isDancerInAssignedGroup(dancer.id)) {
+      window.alert("Solo puedes evaluar a estudiantes de tu grupo asignado.");
+      return;
+    }
     setSelectedDancer(dancer);
     setWrittenScore("70");
     setPracticalCriteria({ ...EMPTY_CRITERIA });
@@ -299,6 +315,11 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
   const saveEvaluation = () => {
   if (!selectedDancer) return;
+  if (!isDancerInAssignedGroup(selectedDancer.id)) {
+    window.alert("No puedes guardar evaluaciones de estudiantes que no pertenecen a tu grupo asignado.");
+    setSelectedDancer(null);
+    return;
+  }
 
   const written = Number(writtenScore);
 
@@ -429,6 +450,10 @@ function InstructorDashboard({ user }: { user: User | null }) {
   };
   
   const deleteDancer = (dancer: Dancer) => {
+    if (!isDancerInAssignedGroup(dancer.id)) {
+      window.alert("Solo puedes eliminar estudiantes de tu grupo asignado.");
+      return;
+    }
     const confirmed = window.confirm(
       `¿Estás segura de que deseas eliminar a ${dancer.name}?
 
@@ -478,6 +503,10 @@ function InstructorDashboard({ user }: { user: User | null }) {
 
 
   const confirmPromotion = (evaluation: DancerEvaluation) => {
+    if (!isDancerInAssignedGroup(evaluation.dancerId)) {
+      window.alert("Solo puedes confirmar ascensos de estudiantes de tu grupo asignado.");
+      return;
+    }
     const confirmed = window.confirm(
       `¿Confirmas el ascenso de ${evaluation.dancerName} a ${evaluation.recommendedLevel}?`
     );
@@ -498,6 +527,12 @@ function InstructorDashboard({ user }: { user: User | null }) {
   return (
     <Layout user={user}>
       <section className="dashboard-content" id="inicio">
+        {!user?.groupId && (
+          <div className="dancers-section" role="alert">
+            <h2>Grupo no asignado</h2>
+            <p>Por ahora no tienes un grupo asignado. Solicita al administrador que te asigne uno para poder gestionar estudiantes, asistencias y evaluaciones.</p>
+          </div>
+        )}
         <header className="topbar">
           <div>
             <p className="eyebrow">PANEL DE EVALUACIÓN</p>
