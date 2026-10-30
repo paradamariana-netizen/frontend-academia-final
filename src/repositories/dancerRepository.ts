@@ -161,6 +161,7 @@ export const dancerRepository = {
       name: dancer.name,
       initials: initialsFromName(dancer.name),
       age: dancer.age,
+      groupId: dancer.groupId,
       level: dancer.level,
       attendance: 0,
       score: 0,
