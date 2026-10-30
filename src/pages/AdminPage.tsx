@@ -196,6 +196,7 @@ function AdminPage() {
         <section className="dancers-section" id="estudiantes">
           <div className="section-heading">
             <div><p className="eyebrow">REGISTRO GENERAL</p><h2>Estudiantes</h2></div>
+            <button type="button" className="primary-button" onClick={() => setShowDancerForm(true)}>＋ Añadir estudiante</button>
           </div>
           <div style={{ marginBottom: 16 }}>
             <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar estudiante..." aria-label="Buscar estudiante" style={{ width: "100%", maxWidth: 400, padding: "12px 14px", border: "1px solid #e5e7eb", borderRadius: 10 }} />
