@@ -138,6 +138,15 @@ export const dancerRepository = {
   },
 
 
+  updateGroup(id: string, groupId: string): boolean {
+    const dancers = getDancers();
+    if (!dancers.some((dancer) => dancer.id === id)) return false;
+    storageService.set<Dancer[]>(DANCERS_KEY, dancers.map((dancer) =>
+      dancer.id === id ? { ...dancer, groupId: groupId || undefined } : dancer
+    ));
+    return true;
+  },
+
   getEvaluationsByDancer(dancerId: string): DancerEvaluation[] {
     return getEvaluations()
       .filter((evaluation) => evaluation.dancerId === dancerId)
