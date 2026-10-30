@@ -18,9 +18,20 @@ function AdminPage() {
   const navigate = useNavigate();
   const user = authRepository.getCurrentUser();
   const [dancers] = useState<Dancer[]>(() => dancerRepository.getDancers());
-  const [instructors] = useState(() => authRepository.getInstructors());
+  const [instructors, setInstructors] = useState(() => authRepository.getInstructors());
   const [payments, setPayments] = useState<PaymentRecord[]>(() => paymentRepository.getPayments());
   const [search, setSearch] = useState("");
+  const groups = ["Infantil", "Pre-juvenil", "Juvenil", "Mayores"];
+
+  const assignGroup = (instructorId: string, groupId: string) => {
+    const success = authRepository.updateInstructorGroup(instructorId, groupId);
+    if (!success) {
+      window.alert("Ese grupo ya tiene un instructor asignado. Cada grupo debe tener un solo responsable.");
+      setInstructors(authRepository.getInstructors());
+      return;
+    }
+    setInstructors(authRepository.getInstructors());
+  };
 
   if (!user || user.role !== "ADMIN") {
     return null;
