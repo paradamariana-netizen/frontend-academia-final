@@ -59,6 +59,8 @@ function AdminPage() {
       ...(newDancerGroup ? { groupId: newDancerGroup } : {}),
     });
     setDancers(dancerRepository.getDancers());
+    // Generar la mensualidad pendiente del mes actual para el nuevo estudiante.
+    setPayments(paymentRepository.getPayments());
     setDancerName("");
     setDancerAge("");
     setDancerLevel("Iniciación");
