@@ -85,7 +85,7 @@ export const authRepository = {
     if (!instructor) return false;
 
     // Un grupo solo puede tener un instructor responsable.
-    if (users.some((user) => user.role === "INSTRUCTOR" && user.id !== id && user.groupId === groupId)) {
+    if (groupId && users.some((user) => user.role === "INSTRUCTOR" && user.id !== id && user.groupId === groupId)) {
       return false;
     }
 
